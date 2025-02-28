@@ -1,0 +1,12 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: "ecogarden"
+            description: "Documentation de mon API ecogarden"
+            version: "1.0.0"
+        servers:
+            - url: 'http://www.ecogarden.test'
+              description: 'Serveur de développement'
+    areas:
+        path_patterns:
+            - ^/
