@@ -41,6 +41,7 @@ security:
          - { path: ^/user, roles: PUBLIC_ACCESS }
          - { path: ^/home, roles: PUBLIC_ACCESS }
          - { path: ^/api/doc, roles: PUBLIC_ACCESS }
+         - { path: ^/weather/Marseille, roles: PUBLIC_ACCESS }
          - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

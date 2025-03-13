@@ -12,9 +12,55 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 
 final class UserController extends AbstractController
 {
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'email', description: 'L\'email de l\'utilisateur', type: 'string', example: 'utilisateur@example.com'),
+                new OA\Property(property: 'password', description: 'Le mot de passe de l\'utilisateur', type: 'string', example: 'motdepasse123'),
+                new OA\Property(property: 'city', description: 'La ville de l\'utilisateur', type: 'string', example: 'Paris'),
+                new OA\Property(property: 'pseudo', description: 'Le pseudo de l\'utilisateur', type: 'string', example: 'utilisateur123')
+            ],
+            type: 'object'
+        )
+    )]
+    #[OA\Response(
+        response: 201,
+        description: 'Utilisateur créé avec succès',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'message', type: 'string', example: 'Utilisateur créé avec succès')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Données invalides ou champ manquant, email/pseudo déjà utilisés',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'error champs', type: 'string', example: 'Le champ pseudo est obligatoire et ne peut pas être vide'),
+                new OA\Property(property: 'error email', type: 'string', example: 'Format d\'email invalide'),
+                new OA\Property(property: 'error email deja utilisé', type: 'string', example: 'Cet email est déjà utilisé'),
+                new OA\Property(property: 'error pseudo deja utilisé', type: 'string', example: 'Ce pseudo est déjà pris')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Erreur interne',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'error', type: 'string', example: 'Une erreur interne est survenue'),
+                new OA\Property(property: 'details', type: 'string', example: 'Détails de l\'erreur interne')
+            ]
+        )
+    )]
+    #[OA\Tag(name: 'user')]
     #[Route('/user', methods: ['POST'])]
     public function createUser(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, UserRepository $userRepository): JsonResponse
     {
@@ -62,6 +108,68 @@ final class UserController extends AbstractController
         }
     }
 
+    #[OA\Parameter(
+        name: 'id',
+        description: 'L\'ID de l\'utilisateur à mettre à jour',
+        in: 'path',
+        required: true,
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'email', description: 'L\'email de l\'utilisateur', type: 'string', example: 'utilisateur@example.com'),
+                new OA\Property(property: 'password', description: 'Le mot de passe de l\'utilisateur', type: 'string', example: 'nouveauMotDePasse123'),
+                new OA\Property(property: 'city', description: 'La ville de l\'utilisateur', type: 'string', example: 'Paris'),
+                new OA\Property(property: 'pseudo', description: 'Le pseudo de l\'utilisateur', type: 'string', example: 'utilisateur123'),
+                new OA\Property(property: 'role', description: 'Les rôles de l\'utilisateur', type: 'array', items: new OA\Items(type: 'string'), example: ['ROLE_USER'])
+            ],
+            type: 'object'
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Utilisateur mis à jour avec succès',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'message', type: 'string', example: 'Utilisateur mis à jour avec succès')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Données invalides ou champ manquant, email/pseudo déjà utilisés',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'error pseudo obligatoire', type: 'string', example: 'Le champ pseudo est obligatoire et ne peut pas être vide'),
+                new OA\Property(property: 'error email invalide', type: 'string', example: 'Format d\'email invalide'),
+                new OA\Property(property: 'error email deja utilisé', type: 'string', example: 'Cet email est déjà utilisé'),
+                new OA\Property(property: 'error pseudo deja utilisé', type: 'string', example: 'Ce pseudo est déjà pris'),
+                new OA\Property(property: 'error mdp', type: 'string', example: 'Le mot de passe doit contenir au moins 6 caractères')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Utilisateur non trouvé',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'error', type: 'string', example: 'Utilisateur non trouvé')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Erreur interne',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'error', type: 'string', example: 'Une erreur interne est survenue'),
+                new OA\Property(property: 'details', type: 'string', example: 'Détails de l\'erreur interne')
+            ]
+        )
+    )]
+    #[OA\Tag(name: 'user')]
     #[IsGranted('ROLE_ADMIN')]
     #[Route('/user/update/{id}', name: 'update_user', methods: ['PUT'])]
     public function updateUser(int $id, Request $request,  UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher,  EntityManagerInterface $entityManager): JsonResponse
@@ -119,6 +227,42 @@ final class UserController extends AbstractController
         }
     }
 
+    #[OA\Parameter(
+        name: 'id',
+        description: 'L\'ID de l\'utilisateur à supprimer',
+        in: 'path',
+        required: true,
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Utilisateur supprimé avec succès',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'message', type: 'string', example: 'Utilisateur supprimé avec succès')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Utilisateur non trouvé',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'error', type: 'string', example: 'Utilisateur non trouvé')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Erreur interne',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'error', type: 'string', example: 'Une erreur interne est survenue'),
+                new OA\Property(property: 'details', type: 'string', example: 'Détails de l\'erreur interne')
+            ]
+        )
+    )]
+    #[OA\Tag(name: 'user')]
     #[IsGranted('ROLE_ADMIN')]
     #[Route('/user/delete/{id}', name: 'delete_user', methods: ['DELETE'])]
     public function deleteUser(int $id, UserRepository $userRepository,  EntityManagerInterface $entityManager): JsonResponse

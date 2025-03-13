@@ -7,6 +7,9 @@ nelmio_api_doc:
         servers:
             - url: 'http://www.ecogarden.test'
               description: 'Serveur de développement'
+
     areas:
         path_patterns:
-            - ^/
+            - ^/advice
+            - ^/user
+            - ^/weather
