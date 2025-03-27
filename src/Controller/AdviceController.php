@@ -21,6 +21,10 @@ final class AdviceController extends AbstractController
         $currentMonth = (new DateTime())->format('m');
         $advices = $adviceRepository->findByMonth($currentMonth);
 
+        if (!$advices) {
+            return new JsonResponse(['error' => 'Aucun conseil trouvé pour ce mois'], 404);
+        }
+
         return $this->json($advices);
     }
 
@@ -31,9 +35,13 @@ final class AdviceController extends AbstractController
             return new JsonResponse(['error' => 'Le mois doit être compris entre 1 et 12'], 400);
         }
 
-        $advice = $adviceRepository->findByMonth($month);
+        $advices = $adviceRepository->findByMonth($month);
 
-        return new JsonResponse($advice);
+        if (!$advices) {
+            return new JsonResponse(['error' => 'Aucun conseil trouvé pour ce mois'], 404);
+        }
+
+        return new JsonResponse($advices);
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -44,6 +52,14 @@ final class AdviceController extends AbstractController
 
         if (!$data || !isset($data['advice'], $data['months'])) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
+        }
+
+        if (!is_string($data['advice']) || strlen($data['advice']) > 255) {
+            return new JsonResponse(['error' => 'Le conseil doit être une chaîne de caractères valide et ne pas dépasser 255 caractères'], 400);
+        }
+
+        if (!is_array($data['months'])) {
+            return new JsonResponse(['error' => 'Le champ "months" doit être un tableau'], 400);
         }
 
         $advice = new Advice();

@@ -24,7 +24,7 @@ final class UserController extends AbstractController
             $requiredFields = ['email', 'password', 'city', 'pseudo'];
             foreach ($requiredFields as $field) {
                 if (empty($data[$field])) {
-                    return new JsonResponse(['error' => "Le champ '$field' est obligatoire et ne peut pas être vide"], 400);
+                    return new JsonResponse(['error' => "Le champ '$field' est obligatoire"], 400);
                 }
             }
 
@@ -58,7 +58,7 @@ final class UserController extends AbstractController
 
             return new JsonResponse(['message' => 'Utilisateur créé avec succès'], 201);
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Une erreur interne est survenue', 'details' => $e->getMessage()], 500);
+            return new JsonResponse(['error' => 'Erreur interne', 'details' => $e->getMessage()], 500);
         }
     }
 
@@ -110,7 +110,7 @@ final class UserController extends AbstractController
                 $entityManager->persist($user);
                 $entityManager->flush();
 
-                return new JsonResponse(['message' => 'Utilisateur modifier avec succès'], 201);
+                return new JsonResponse(['message' => 'Utilisateur modifier avec succès'], 200);
             }
 
 
