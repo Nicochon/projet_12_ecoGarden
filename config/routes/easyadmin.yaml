@@ -1,3 +1,10 @@
 easyadmin:
     resource: .
     type: easyadmin.routes
+admin_delete:
+    path: /admin/advice/{id}/delete
+    methods: [ GET ]
+    defaults:
+        _controller: 'App\Controller\Admin\AdviceCrudController::deleteAction'
+        _legacy_controller: 'AdviceCrudController'
+        _legacy_link: 'AdviceCrudController'

@@ -38,7 +38,7 @@ class UserCrudController extends AbstractCrudController
     {
         return [
             IdField::new('id')->onlyOnIndex(),
-            TextField::new('username'),
+            TextField::new('pseudo'),
             TextField::new('email'),
         ];
     }
