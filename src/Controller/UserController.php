@@ -85,14 +85,17 @@ final class UserController extends AbstractController
                     return new JsonResponse(['error' => 'Format d\'email invalide'], 400);
                 }
 
-                $existingUser = $userRepository->findOneBy(['email' => $data['email']]);
-                if ($existingUser) {
-                    return new JsonResponse(['error' => 'Cet email est déjà utilisé'], 400);
+                if ($data['email'] !== $user->getEmail()) {
+                    $existingUser = $userRepository->findOneBy(['email' => $data['email']]);
+                    if ($existingUser) {
+                        return new JsonResponse(['error' => 'Cet email est déjà utilisé'], 400);
+                    }
                 }
-
-                $existingPseudo = $userRepository->findOneBy(['pseudo' => $data['pseudo']]);
-                if ($existingPseudo) {
-                    return new JsonResponse(['error' => 'Ce pseudo est déjà pris'], 400);
+                if ($data['pseudo'] !== $user->getPseudo()) {
+                    $existingPseudo = $userRepository->findOneBy(['pseudo' => $data['pseudo']]);
+                    if ($existingPseudo) {
+                        return new JsonResponse(['error' => 'Ce pseudo est déjà pris'], 400);
+                    }
                 }
 
                 $user->setPseudo($data['pseudo']);
