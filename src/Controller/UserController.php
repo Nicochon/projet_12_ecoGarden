@@ -87,13 +87,13 @@ final class UserController extends AbstractController
 
                 if ($data['email'] !== $user->getEmail()) {
                     $existingUser = $userRepository->findOneBy(['email' => $data['email']]);
-                    if ($existingUser) {
+                    if ($existingUser && $existingUser->getId() !== $user->getId()) {
                         return new JsonResponse(['error' => 'Cet email est déjà utilisé'], 400);
                     }
                 }
                 if ($data['pseudo'] !== $user->getPseudo()) {
                     $existingPseudo = $userRepository->findOneBy(['pseudo' => $data['pseudo']]);
-                    if ($existingPseudo) {
+                    if ($existingPseudo && $existingPseudo->getId() !== $user->getId()) {
                         return new JsonResponse(['error' => 'Ce pseudo est déjà pris'], 400);
                     }
                 }
