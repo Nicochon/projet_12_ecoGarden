@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\UserRepository;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpClient\HttpClient;
@@ -18,7 +19,7 @@ final class WeatherController extends AbstractController
     private string $apiKey = 'fdd787f4dba6b80e8f6a5e3ac7e49fb9';
 
     #[Route('/weather/{city?}', name: 'get_weather', methods: ['GET'])]
-    public function getWeatherByTown(?string $city, CacheInterface $cache, Security $security, UserRepository $userRepository): JsonResponse
+    public function getWeatherByTown(?string $city, CacheInterface $cache, Security $security, UserRepository $userRepository, LoggerInterface $logger): JsonResponse
     {
         if (!$city) {
             $city = $this->getUserCity($security, $userRepository);
@@ -29,8 +30,11 @@ final class WeatherController extends AbstractController
         }
 
         $cacheKey = 'weather_' . strtolower($city);
-        $weatherData = $cache->get($cacheKey, function (ItemInterface $item) use ($city) {
+        $isFresh = false;
+
+        $weatherData = $cache->get($cacheKey, function (ItemInterface $item) use ($city, &$isFresh) {
             $item->expiresAfter(1800); //30 minutes
+            $isFresh = true;
             $client = HttpClient::create();
             $url = sprintf(
                 'https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric&lang=fr',
@@ -46,6 +50,12 @@ final class WeatherController extends AbstractController
 
             return $response->toArray();
         });
+
+        if ($isFresh) {
+            $logger->info("Météo récupérée depuis l'API pour {$city}.");
+        } else {
+            $logger->info("Météo récupérée depuis le cache pour {$city}.");
+        }
 
         if (!$weatherData) {
             return new JsonResponse(['error' => 'Impossible de récupérer la météo'], 500);
